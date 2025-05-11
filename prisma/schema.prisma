@@ -6,7 +6,7 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
+  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -15,9 +15,11 @@ datasource db {
 }
 
 model User {
-  id      Int     @id @default(autoincrement())
-  email   String  @unique
-  name    String
+  id       Int       @id @default(autoincrement())
+  email    String    @unique
+  name     String    @unique
+  password String
+  projects Project[]
 }
 
 model Project {
@@ -26,6 +28,7 @@ model Project {
   name        String  @unique
   description String?
   creator     User    @relation(fields: [creatorId], references: [id])
+  tasks       Task[]
 }
 
 enum TaskStatus {
@@ -35,14 +38,14 @@ enum TaskStatus {
 }
 
 model Task {
-  id            Int     @id @default(autoincrement())
-  projectId       Int
-  name            String  @unique
-  description     String?
-  creationDate    DateTime @default(now())
-  startDate       DateTime?
-  completionDate  DateTime?
-  costedTime      Int 
-  status          TaskStatus @default(CREATED)
-  project         Project @relation(fields: [projectId], references: [id])
+  id             Int        @id @default(autoincrement())
+  projectId      Int
+  name           String     @unique
+  description    String?
+  creationDate   DateTime   @default(now())
+  startDate      DateTime?
+  completionDate DateTime?
+  costedTime     Int
+  status         TaskStatus @default(CREATED)
+  project        Project    @relation(fields: [projectId], references: [id])
 }
