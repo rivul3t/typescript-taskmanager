@@ -1,9 +1,8 @@
-import prismaClient from './main';
+import prismaClient from '../main';
 import { NextFunction, Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-
-const jwt_token = 'abcde';
+import { Prisma } from '@prisma/client';
 
 export const register = async (req: Request, res: Response, next: NextFunction) => {
     const { username, password, email } = req.body;
@@ -26,13 +25,14 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
         res.status(200).json({ id: user.id, token: token });
 
     } catch (error) {
-        if (error.code === 'P2002') {
+        if (error instanceof Prisma.PrismaClientKnownRequestError && 
+            error.code === 'P2002') {
             res.status(409).json({ error: 'User already exists' });
         } else {
             throw error;
         }
-    }
 
+    }
 }
 
 export const login = async (req: Request, res: Response, next: NextFunction) => {

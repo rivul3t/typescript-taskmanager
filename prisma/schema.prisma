@@ -19,16 +19,24 @@ model User {
   email    String    @unique
   name     String    @unique
   password String
-  projects Project[]
+  projects ProjectMember[]
 }
 
 model Project {
-  id          Int     @id @default(autoincrement())
+  id          Int             @id @default(autoincrement())
   creatorId   Int
-  name        String  @unique
+  name        String          @unique
   description String?
-  creator     User    @relation(fields: [creatorId], references: [id])
+  members     ProjectMember[]
   tasks       Task[]
+}
+
+model ProjectMember {
+  id        Int     @id @default(autoincrement())
+  user      User    @relation(fields: [userId], references: [id])
+  userId    String
+  project   Project @relation(fields: [projectId], references: [id])
+  projectId String
 }
 
 enum TaskStatus {
