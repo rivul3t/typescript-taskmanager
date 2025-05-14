@@ -1,66 +1,60 @@
 import { Request, Response, Router } from "express";
-import prismaClient from '../main';
-import { Prisma } from "@prisma/client";
+import { createTask, finishTask, getTask, getTasks, startTask } from "../services/task.service";
 
-export const createTask =  async (req: Request, res: Response) => {
-    const { name, description, project_name } = req.body;
-
-    if (!name || !project_name) {
-        res.status(400).json({ error: 'Request must specify fields name and project_name' });
-    }
-
-    try {
-        const task = await prismaClient.task.create({
-            data: {
-                name: name,
-                description: description || "",
-                creationDate: new Date(),
-                project: {
-                    connect: {
-                        id: req.user.id,
-                    },
-                },
-            },
-        });
-
-        res.status(200).json({ result: 'Project succesfully created' })
-    } catch (error) {
-        if (error instanceof Prisma.PrismaClientKnownRequestError && 
-            error.code === 'P2002') {
-            res.status(409).json({ error: 'Project already exists' });
-        } else {
-            throw error;
-        }
-    }
-}
-
-export const pickTask =  async (req: Request, res: Response) => {
-    const { name, description } = req.body;
+export const addTask =  async (req: Request, res: Response) => {
+    const { name, description, due_date } = req.body;
+    const projectId = parseInt(req.params.projectId);
 
     if (!name) {
-        res.status(400).json({ error: 'Request must specify field name' });
+        res.status(400).json({ error: 'Request must specify fields name' });
     }
 
     try {
-        const task = await prismaClient.task.create({
-            data: {
-                name: name,
-                description: description || "",
-                project: {
-                    connect: {
-                        id: req.user.id,
-                    },
-                },
-            },
-        });
-
-        res.status(200).json({ result: 'Project succesfully created' })
+        const task = await createTask(projectId, name, description, due_date);
+        res.status(200).json({ result: 'Task succesfully created' })
     } catch (error) {
-        if (error instanceof Prisma.PrismaClientKnownRequestError && 
-            error.code === 'P2002') {
-            res.status(409).json({ error: 'Project already exists' });
-        } else {
-            throw error;
-        }
+        res.status(400).json({ error: (error as Error).message });
     }
-}
+};
+
+export const assignTask = async (req: Request, res: Response) => {
+    const taskId = parseInt(req.params.id);
+
+    try {
+        const task = await startTask(taskId, req.user.id);
+        res.status(200).json({ result: 'You successfully assign task' })
+    } catch (error) {
+        res.status(400).json({ error: (error as Error).message });
+    }
+};
+
+export const completeTask = async (req: Request, res: Response) => {
+    const taskId = parseInt(req.params.id);
+
+    try {
+        const task = finishTask(taskId, req.user.id);
+        res.status(200).json({ result: 'You successfully finish task' })
+    } catch (error) {
+        res.status(400).json({ error: (error as Error).message });
+    }
+};
+
+export const getProjectTask = async (req: Request, res: Response) => {
+    const taskId = parseInt(req.params.taskId)
+    try {
+        const tasks = getTask(taskId);
+        res.status(200).json({ tasks })
+    } catch (error) {
+        res.status(400).json({ error: (error as Error).message });
+    }
+};
+
+export const getProjectTasks = async (req: Request, res: Response) => {
+    const projectId = parseInt(req.params.projecId);
+    try {
+        const tasks = getTasks(projectId);
+        res.status(200).json({ tasks })
+    } catch (error) {
+        res.status(400).json({ error: (error as Error).message });
+    }
+};

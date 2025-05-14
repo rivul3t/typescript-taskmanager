@@ -20,7 +20,6 @@ export const auth = (req: Request, res: Response, next: NextFunction) => {
         res.status(401).json({ error: 'Token must be specified' });
         return;
     }
-
     try {
         req.user = jwt.verify(token, process.env.JWT_SECRET as string);
         next();
