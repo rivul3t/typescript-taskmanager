@@ -1,5 +1,6 @@
 import prismaClient from '../main';
 import { Prisma, TaskStatus } from '@prisma/client';
+import { ApiError } from '../utils/ApiError';
 
 export const createTask = async (projectId: number, name: string, description: string, dueDate: Date,) => {
     try {
@@ -15,9 +16,9 @@ export const createTask = async (projectId: number, name: string, description: s
     } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       if (error.code === 'P2002') {
-        throw new Error('Task already exists');
+        throw new ApiError(409, 'Task already exists');
       } else if (error.code === 'P2003') {
-        throw new Error('No such project');
+        throw new ApiError(404, 'No such project');
       }
     }
     throw error;
@@ -25,32 +26,47 @@ export const createTask = async (projectId: number, name: string, description: s
 };
 
 export const getTasks = async (projecId: number) => {
-  return await prismaClient.task.findMany({
+  const tasks = await prismaClient.task.findMany({
     where: {
       projectId: projecId,
     },
   });
+
+  return tasks;
 };
 
 export const getTask = async (taskId: number) => {
-  return await prismaClient.task.findFirst({
+  const task =  await prismaClient.task.findFirst({
     where: {
       id: taskId,
     },
   });
+
+  if (!task) {
+    throw new ApiError(404, 'Task not found');
+  };
 }
 
 export const startTask = async (taskId: number, userId: number) => {
-  return await prismaClient.task.update({
-    where: {
-      id: taskId,
-    },
-    data: {
-      status: TaskStatus.PROGRESS,
-      performerId: userId,
-      startDate: new Date(),
-    },
-  });
+  try {
+    const updatedTask =  await prismaClient.task.update({
+      where: {
+        id: taskId,
+      },
+      data: {
+        status: TaskStatus.PROGRESS,
+        performerId: userId,
+        startDate: new Date(),
+      },
+    });
+
+    return updatedTask;
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+      throw new ApiError(404, 'No such task');
+    };
+    throw error;
+  }
 };
 
 export const finishTask = async (taskId: number, userId: number) => {
@@ -61,19 +77,26 @@ export const finishTask = async (taskId: number, userId: number) => {
   })
 
   if (!task?.performerId || task.performerId !== userId || !task.startDate) {
-    throw new Error('This task not started yet or you are not performer');
+    throw new ApiError(400, 'This task not started yet or you are not performer');
   }
 
   const currentDate = new Date();
   const diff = currentDate.getTime() - task.startDate.getTime();
-
-  return await prismaClient.task.update({
-    where: {
-      id: taskId,
-    },
-    data: {
-      completionDate: currentDate,
-      costedTime: diff,
-    },
-  })
+  try {
+    const updatedTask = await prismaClient.task.update({
+      where: {
+        id: taskId,
+      },
+      data: {
+        completionDate: currentDate,
+        costedTime: diff,
+      },
+    })
+    return updatedTask;
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+      throw new ApiError(404, 'No such task');
+    };
+    throw error;
+  }
 };

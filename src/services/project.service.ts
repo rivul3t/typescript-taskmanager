@@ -1,5 +1,6 @@
 import prismaClient from '../main';
 import { Prisma, Role } from '@prisma/client';
+import { ApiError } from '../utils/ApiError';
 
 export const createProject = async (name: string, description: string | undefined, userId: number) => {
     try {
@@ -18,32 +19,37 @@ export const createProject = async (name: string, description: string | undefine
     } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       if (error.code === 'P2002') {
-        throw new Error('Project already exists');
-      }
-    }
-
+        throw new ApiError(409, 'Project already exists');
+      };
+    };
     throw error;
-    }
+    };
 }
 
 export const findProjects = async (userId: number) => {
-    return await prismaClient.project.findMany({
+    const projects = await prismaClient.project.findMany({
         where: {
             members: {
                 some: {
                     userId: userId,
-                }
+                },
             },
         },
     });
+
+    return projects;
 }
 
 export const findProject = async (projectId: number) => {
-    return await prismaClient.project.findUnique({
+    const project = await prismaClient.project.findUnique({
         where: {
             id: projectId,
         }
     });
+
+    if (!project) {
+        throw new ApiError(404, 'Project not found');
+    };
 }
 
 export const addMember = async (projectId: number, userId: number, requestedUserId: number) => {
@@ -57,7 +63,7 @@ export const addMember = async (projectId: number, userId: number, requestedUser
     });
 
     if (!member || (member.role !== Role.OWNER)) {
-        throw new Error('No such project, or you are not owner')
+        throw new ApiError(403, 'No such project, or you are not owner')
     }
 
     try {
@@ -70,7 +76,7 @@ export const addMember = async (projectId: number, userId: number, requestedUser
     } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       if (error.code === 'P2002') {
-        throw new Error('User already member');
+        throw new ApiError(409, 'User already member of project');
       }
     }
 

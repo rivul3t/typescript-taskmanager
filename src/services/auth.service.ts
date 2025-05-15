@@ -1,5 +1,6 @@
 import prismaClient from '../main';
 import { Prisma } from '@prisma/client';
+import { ApiError } from '../utils/ApiError';
 
 export const createUser = async (name: string, password: string, email: string) => {
     try {
@@ -13,7 +14,7 @@ export const createUser = async (name: string, password: string, email: string) 
     } catch (error) {
         if (error instanceof Prisma.PrismaClientKnownRequestError) {
           if (error.code === 'P2002') {
-            throw new Error('User already exists');
+            throw new ApiError(409, 'User already exists');
           }
         };
         throw error;
@@ -21,18 +22,13 @@ export const createUser = async (name: string, password: string, email: string) 
 };
 
 export const findUser = async (name: string) => {
-    try {
-        return await prismaClient.user.findFirstOrThrow({
-            where: {
-                name: name,
-            },
-        });
-    } catch (error) {
-        if (error instanceof Prisma.PrismaClientKnownRequestError) {
-          if (error.code === 'P2025') {
-            throw new Error('No such user');
-          }
-        };
-        throw error;
-    };
+    const user = await prismaClient.user.findUnique({
+        where: {
+            name: name,
+        },
+    });
+    if (!user) {
+        throw new ApiError(404, 'User not found');
+    }
+    return user;
 }
