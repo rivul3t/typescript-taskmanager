@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { addProject, createMember, getProject, getProjects } from "../controllers/project.controller";
+import { addProject, addMember, getProject, getProjects } from "../controllers/project.controller";
 
 const router: Router = Router();
 
@@ -9,6 +9,6 @@ router.get('/projects', getProjects);
 
 router.get('/projects/:projectId', getProject);
 
-router.post('/projects/:projectId/members', createMember);
+router.post('/projects/:projectId/members', addMember);
 
 export default router;

@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response, Router } from "express";
-import { addMember, createProject, findProjects } from "../services/project.service";
+import { createMember, createProject, findProjects, findProject } from "../services/project.service";
 import { ApiError } from "../utils/ApiError";
 
 export const addProject = async (req: Request, res: Response, next: NextFunction) => {
@@ -32,14 +32,14 @@ export const getProjects = async (req: Request, res: Response, next: NextFunctio
 export const getProject = async (req: Request, res: Response, next: NextFunction) => {
     const projectId = parseInt(req.params.projectId);
     try {
-        const project = await findProjects(projectId);
+        const project = await findProject(projectId);
         res.status(200).json({ project })
     } catch (error) {
         next(error);
     }
 }
 
-export const createMember = async (req: Request, res: Response, next: NextFunction) => {
+export const addMember = async (req: Request, res: Response, next: NextFunction) => {
     const projectId = parseInt(req.params.projectId);
     const { user_id } = req.body;
 
@@ -49,7 +49,7 @@ export const createMember = async (req: Request, res: Response, next: NextFuncti
     }
 
     try {
-        const member = await addMember(projectId, req.user.id, user_id);
+        const member = await createMember(projectId, req.user.id, user_id);
         res.status(200).json({ result: 'Member succesfully added' });
     } catch (error) {
         next(error)

@@ -1,4 +1,4 @@
-import { Router, Request, Response } from "express";
+import { Router } from "express";
 import { assignTask, completeTask, getProjectTask, getProjectTasks } from "../controllers/task.controller";
 
 const router: Router = Router();

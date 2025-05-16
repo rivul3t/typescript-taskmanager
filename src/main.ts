@@ -15,12 +15,14 @@ export default prismaClient;
 const app = express();
 
 app.use(express.json()); 
-app.use(auth, errorHandler);
-app.use('/api/users', authRouter);
+app.use('/api', authRouter);
+
+app.use(auth);
 app.use('/api', projectRouter);
 app.use('/api', taskRoutes);
+app.use(errorHandler);
 
 
 app.listen(8888, () => {
     console.log('Server listen on http://localhost:8888')
-})
+});

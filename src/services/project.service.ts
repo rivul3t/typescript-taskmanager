@@ -4,18 +4,22 @@ import { ApiError } from '../utils/ApiError';
 
 export const createProject = async (name: string, description: string | undefined, userId: number) => {
     try {
-    return await prismaClient.project.create({
+        const project = await prismaClient.project.create({
             data: {
                 name: name,
                 description: description || "",
                 members: {
-                    create: {
-                        userId: userId,
-                        role: Role.OWNER,
-                    },
+                    create: [
+                        {
+                            userId: userId,
+                            role: Role.OWNER,
+                        },
+                    ],
                 },
             },
         });
+
+        return project;
     } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       if (error.code === 'P2002') {
@@ -50,9 +54,11 @@ export const findProject = async (projectId: number) => {
     if (!project) {
         throw new ApiError(404, 'Project not found');
     };
+
+    return project;
 }
 
-export const addMember = async (projectId: number, userId: number, requestedUserId: number) => {
+export const createMember = async (projectId: number, userId: number, requestedUserId: number) => {
     const member = await prismaClient.projectMember.findUnique({
         where: {
             userId_projectId: {
@@ -73,6 +79,8 @@ export const addMember = async (projectId: number, userId: number, requestedUser
                 projectId: projectId,
             }
         });
+
+        return newMember;
     } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       if (error.code === 'P2002') {
@@ -82,4 +90,5 @@ export const addMember = async (projectId: number, userId: number, requestedUser
 
     throw error;
     }
+
 }
