@@ -1,4 +1,4 @@
-import prismaClient from '../main';
+import prismaClient from '../lib/prisma';
 import { Prisma } from '@prisma/client';
 import { ApiError } from '../utils/ApiError';
 
@@ -22,7 +22,7 @@ export const createUser = async (name: string, password: string, email: string) 
 };
 
 export const findUser = async (name: string) => {
-    const user = await prismaClient.user.findUnique({
+    const user = await prismaClient.user.findFirst({
         where: {
             name: name,
         },

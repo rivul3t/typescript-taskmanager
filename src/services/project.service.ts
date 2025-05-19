@@ -1,4 +1,4 @@
-import prismaClient from '../main';
+import prismaClient from '../lib/prisma';
 import { Prisma, Role } from '@prisma/client';
 import { ApiError } from '../utils/ApiError';
 
@@ -44,15 +44,20 @@ export const findProjects = async (userId: number) => {
     return projects;
 }
 
-export const findProject = async (projectId: number) => {
-    const project = await prismaClient.project.findUnique({
+export const findProject = async (projectId: number, userId: number) => {
+    const project = await prismaClient.project.findFirst({
         where: {
+            members: {
+                some: {
+                    userId: userId,
+                },
+            },
             id: projectId,
-        }
+        },
     });
 
     if (!project) {
-        throw new ApiError(404, 'Project not found');
+        throw new ApiError(404, 'Project not found(maybe you are not member of project)');
     };
 
     return project;
@@ -75,7 +80,7 @@ export const createMember = async (projectId: number, userId: number, requestedU
     try {
         const newMember = await prismaClient.projectMember.create({
             data: {
-                userId: userId,
+                userId: requestedUserId,
                 projectId: projectId,
             }
         });

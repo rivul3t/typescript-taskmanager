@@ -11,18 +11,19 @@ export const addTask =  async (req: Request, res: Response, next: NextFunction) 
         next(error);
     }
     try {
-        const task = await createTask(projectId, name, description, due_date);
-        res.status(200).json({ result: 'Task succesfully created' })
+        const task = await createTask(projectId, req.user.id, name, description, due_date);
+        res.status(200).json({ result: 'Task succesfully created', id: task.id })
     } catch (error) {
         next(error);
     }
 };
 
 export const assignTask = async (req: Request, res: Response, next: NextFunction) => {
-    const taskId = parseInt(req.params.id);
+    const taskId = parseInt(req.params.taskId);
+    const projectId = parseInt(req.params.projectId);
 
     try {
-        const task = await startTask(taskId, req.user.id);
+        const task = await startTask(taskId, req.user.id, projectId);
         res.status(200).json({ result: 'You successfully assign task' })
     } catch (error) {
         next(error);
@@ -30,10 +31,10 @@ export const assignTask = async (req: Request, res: Response, next: NextFunction
 };
 
 export const completeTask = async (req: Request, res: Response, next: NextFunction) => {
-    const taskId = parseInt(req.params.id);
+    const taskId = parseInt(req.params.taskId);
 
     try {
-        const task = finishTask(taskId, req.user.id);
+        const task = await finishTask(taskId, req.user.id);
         res.status(200).json({ result: 'You successfully finish task' })
     } catch (error) {
         next(error);
@@ -41,9 +42,11 @@ export const completeTask = async (req: Request, res: Response, next: NextFuncti
 };
 
 export const getProjectTask = async (req: Request, res: Response, next: NextFunction) => {
-    const taskId = parseInt(req.params.taskId)
+    const taskId = parseInt(req.params.taskId);
+    const projectId = parseInt(req.params.projectId);
+
     try {
-        const tasks = getTask(taskId);
+        const tasks = await getTask(taskId, req.user.id, projectId);
         res.status(200).json({ tasks })
     } catch (error) {
         next(error);
@@ -51,9 +54,10 @@ export const getProjectTask = async (req: Request, res: Response, next: NextFunc
 };
 
 export const getProjectTasks = async (req: Request, res: Response, next: NextFunction) => {
-    const projectId = parseInt(req.params.projecId);
+    const projectId = parseInt(req.params.projectId);
+
     try {
-        const tasks = getTasks(projectId);
+        const tasks = await getTasks(projectId, req.user.id);
         res.status(200).json({ tasks })
     } catch (error) {
         next(error);

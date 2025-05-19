@@ -1,18 +1,41 @@
-import prismaClient from '../main';
+import prismaClient from '../lib/prisma';
 import { Prisma, TaskStatus } from '@prisma/client';
 import { ApiError } from '../utils/ApiError';
 
-export const createTask = async (projectId: number, name: string, description: string, dueDate: Date,) => {
+const checkUserInTheProject = async (projectId: number, userId: number) => {
+  const project = await prismaClient.project.findFirst({
+    where: {
+      id: projectId,
+      members: {
+        some: {
+          userId: userId,
+        },
+      },
+    },
+  });
+
+  if (!project) {
+    throw new ApiError(404, 'Not found');
+  }
+
+  return project;
+}
+
+export const createTask = async (projectId: number, userId: number, name: string, description: string, dueDate: Date,) => {
     try {
-        return await prismaClient.task.create({
-            data: {
-                projectId: projectId,
-                name: name,
-                description: description || "",
-                dueDate: dueDate,
-                status: TaskStatus.CREATED,
-            },
-        });
+
+      await checkUserInTheProject(projectId, userId);
+
+      const task = await prismaClient.task.create({
+          data: {
+              projectId: projectId,
+              name: name,
+              description: description || "",
+              dueDate: dueDate,
+              status: TaskStatus.CREATED,
+          },
+      });
+      return task;
     } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       if (error.code === 'P2002') {
@@ -25,7 +48,9 @@ export const createTask = async (projectId: number, name: string, description: s
     }
 };
 
-export const getTasks = async (projecId: number) => {
+export const getTasks = async (projecId: number, userId: number) => {
+  await checkUserInTheProject(projecId, userId);
+
   const tasks = await prismaClient.task.findMany({
     where: {
       projectId: projecId,
@@ -35,7 +60,9 @@ export const getTasks = async (projecId: number) => {
   return tasks;
 };
 
-export const getTask = async (taskId: number) => {
+export const getTask = async (taskId: number, projectId: number, userId: number) => {
+  await checkUserInTheProject(projectId, userId);
+
   const task =  await prismaClient.task.findFirst({
     where: {
       id: taskId,
@@ -45,13 +72,16 @@ export const getTask = async (taskId: number) => {
   if (!task) {
     throw new ApiError(404, 'Task not found');
   };
+  return task;
 }
 
-export const startTask = async (taskId: number, userId: number) => {
+export const startTask = async (taskId: number, userId: number, projectId: number) => {
   try {
+    await checkUserInTheProject(projectId, userId);
     const updatedTask =  await prismaClient.task.update({
       where: {
         id: taskId,
+        status: TaskStatus.CREATED,
       },
       data: {
         status: TaskStatus.PROGRESS,
@@ -70,11 +100,11 @@ export const startTask = async (taskId: number, userId: number) => {
 };
 
 export const finishTask = async (taskId: number, userId: number) => {
-  const task = await prismaClient.task.findUnique({
+  const task = await prismaClient.task.findFirst({
     where: {
       id: taskId,
     }
-  })
+  });
 
   if (!task?.performerId || task.performerId !== userId || !task.startDate) {
     throw new ApiError(400, 'This task not started yet or you are not performer');
