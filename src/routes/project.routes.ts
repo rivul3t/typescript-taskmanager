@@ -1,14 +1,19 @@
 import { Router } from "express";
-import { addProject, addMember, getProject, getProjects } from "../controllers/project.controller";
+import {
+  addProject,
+  addMember,
+  getProject,
+  getProjects,
+} from "../controllers/project.controller";
 
 const router: Router = Router();
 
-router.post('/projects', addProject);
+router.post("/projects", addProject);
 
-router.get('/projects', getProjects);
+router.get("/projects", getProjects);
 
-router.get('/projects/:projectId', getProject);
+router.get("/projects/:projectId", getProject);
 
-router.post('/projects/:projectId/members', addMember);
+router.post("/projects/:projectId/members", addMember);
 
 export default router;

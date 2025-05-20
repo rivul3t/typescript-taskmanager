@@ -3,7 +3,7 @@
  * https://jestjs.io/docs/configuration
  */
 
-import type {Config} from 'jest';
+import type { Config } from "jest";
 
 const config: Config = {
   // All imported modules in your tests should be mocked automatically
@@ -11,9 +11,9 @@ const config: Config = {
 
   // Stop running tests after `n` failures
   // bail: 0,
-  preset: 'ts-jest',
+  preset: "ts-jest",
 
-  setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
+  setupFilesAfterEnv: ["<rootDir>/tests/setup.ts"],
   // The directory where Jest should store its cached dependency information
   // cacheDirectory: "/tmp/jest_rs",
 
