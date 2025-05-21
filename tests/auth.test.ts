@@ -90,13 +90,13 @@ describe("Auth api", () => {
 
   it("should handle wrong password", async () => {
     await request(app).post("/api/users/register").send({
-      name: 'abibi',
-      email: 'rete',
-      password: '123'
-    })
+      name: "abibi",
+      email: "rete",
+      password: "123",
+    });
 
     const res = await request(app).post("/api/users/login").send({
-      name: 'abibi',
+      name: "abibi",
       password: "zxc",
     });
 

@@ -29,7 +29,9 @@ export const addTask = async (
       description,
       due_date,
     );
-    logger.info(`User ${req.user.id} successfully added task ${name}:${task.id} to project ${projectId}`);
+    logger.info(
+      `User ${req.user.id} successfully added task ${name}:${task.id} to project ${projectId}`,
+    );
     res.status(200).json({ result: "Task succesfully created", id: task.id });
   } catch (error) {
     next(error);
@@ -46,7 +48,9 @@ export const assignTask = async (
 
   try {
     const task = await startTask(taskId, req.user.id, projectId);
-    logger.info(`User ${req.user.id} successfully assigned task ${taskId} in ther project ${projectId}`);
+    logger.info(
+      `User ${req.user.id} successfully assigned task ${taskId} in ther project ${projectId}`,
+    );
     res.status(200).json({ result: "You successfully assign task" });
   } catch (error) {
     next(error);
@@ -63,7 +67,9 @@ export const completeTask = async (
 
   try {
     const task = await finishTask(taskId, req.user.id);
-    logger.info(`User ${req.user.id} successfully complete task ${taskId} in ther project ${projectId}`);
+    logger.info(
+      `User ${req.user.id} successfully complete task ${taskId} in ther project ${projectId}`,
+    );
     res.status(200).json({ result: "You successfully finish task" });
   } catch (error) {
     next(error);
@@ -84,7 +90,7 @@ export const getProjectTask = async (
   });
   try {
     const task = await getTask(taskId, projectId, req.user.id);
-    res.status(200).json( {id: task.id} );
+    res.status(200).json({ id: task.id });
   } catch (error) {
     next(error);
   }

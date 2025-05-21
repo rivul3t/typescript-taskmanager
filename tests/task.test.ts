@@ -115,15 +115,15 @@ describe("Task API", () => {
         name: "uUwUu",
       });
 
-    console.log('afs;klaskld;f')
-    console.log(task.body)
+    console.log("afs;klaskld;f");
+    console.log(task.body);
     const receivedTask = await request(app)
       .get(`/api/projects/${projectId1}/tasks/${task.body.id}`)
       .set("Authorization", `Bearer ${token1}`);
 
     expect(receivedTask.status).toBe(200);
     expect(receivedTask.body).toHaveProperty("id");
-    console.log(receivedTask.body)
+    console.log(receivedTask.body);
     expect(receivedTask.body.id).toBe(task.body.id);
   });
 
