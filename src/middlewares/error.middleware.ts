@@ -12,8 +12,6 @@ export const errorHandler = (
   let status = 500;
   let message = "Internal server error";
 
-  logger.error(err);
-
   if (err instanceof ApiError) {
     status = err.statusCode;
     message = err.message;
@@ -23,6 +21,18 @@ export const errorHandler = (
     status = 401;
     message = err.message;
   }
+
+  logger.error({
+    message: err.message,
+    status,
+    method: req.method,
+    path: req.originalUrl,
+    user: req.user ? { id: req.user.id, email: req.user.email } : null,
+    body: req.body,
+    params: req.params,
+    query: req.query,
+    stack: err.stack,
+  });
 
   res.status(status).json({ error: message });
 };

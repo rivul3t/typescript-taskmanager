@@ -6,6 +6,8 @@ import {
   findProject,
 } from "../services/project.service";
 import { ApiError } from "../utils/ApiError";
+import logger from "../utils/logger";
+import { log } from "winston";
 
 export const addProject = async (
   req: Request,
@@ -15,12 +17,14 @@ export const addProject = async (
   const { name, description } = req.body;
 
   if (!name) {
+
     const error = new ApiError(400, "Request must specify field name");
     next(error);
   }
 
   try {
     const project = await createProject(name, description, req.user.id);
+    logger.info(`User ${req.user.id} successfully created project ${name}`)
     res
       .status(200)
       .json({ result: "Project succesfully created", id: project.id });
@@ -75,6 +79,7 @@ export const addMember = async (
 
   try {
     const member = await createMember(projectId, req.user.id, user_id);
+    logger.info(`User ${req.user.id} successfully added ${user_id} to project ${projectId}`);
     res
       .status(200)
       .json({ result: "Member succesfully added", member: member });

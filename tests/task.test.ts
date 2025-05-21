@@ -95,7 +95,7 @@ describe("Task API", () => {
       .set("Authorization", `Bearer ${token1}`);
 
     expect(tasks.status).toBe(200);
-    expect(Array.isArray(tasks.body)).toBe(true);
+    expect(Array.isArray(tasks.body.tasks)).toBe(true);
   });
 
   it("should fail on return all tasks of foreign project", async () => {
@@ -115,13 +115,16 @@ describe("Task API", () => {
         name: "uUwUu",
       });
 
+    console.log('afs;klaskld;f')
+    console.log(task.body)
     const receivedTask = await request(app)
       .get(`/api/projects/${projectId1}/tasks/${task.body.id}`)
       .set("Authorization", `Bearer ${token1}`);
 
     expect(receivedTask.status).toBe(200);
     expect(receivedTask.body).toHaveProperty("id");
-    expect(receivedTask.body.id === task.body.id).toBe(true);
+    console.log(receivedTask.body)
+    expect(receivedTask.body.id).toBe(task.body.id);
   });
 
   it("should fail get non-existent task", async () => {
@@ -158,7 +161,7 @@ describe("Task API", () => {
       });
 
     const assginedTask = await request(app)
-      .patch(`/api/projects/${projectId2}/tasks/${task.body.id}/assign`)
+      .patch(`/api/projects/${projectId1}/tasks/${task.body.id}/assign`)
       .set("Authorization", `Bearer ${token1}`);
 
     expect(assginedTask.status).toBe(200);

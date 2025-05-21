@@ -37,10 +37,10 @@ beforeAll(async () => {
   await prismaClient.user.deleteMany({});
 });
 
-afterAll(async () => {
-  await prismaClient.task.deleteMany({});
-  await prismaClient.projectMember.deleteMany({});
-  await prismaClient.project.deleteMany({});
-  await prismaClient.user.deleteMany({});
-  await prismaClient.$disconnect();
-});
+//afterAll(async () => {
+//  await prismaClient.task.deleteMany({});
+//  await prismaClient.projectMember.deleteMany({});
+//  await prismaClient.project.deleteMany({});
+//  await prismaClient.user.deleteMany({});
+//  await prismaClient.$disconnect();
+//});

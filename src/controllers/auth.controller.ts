@@ -45,8 +45,6 @@ export const login = async (
 ) => {
   const { name, password } = req.body;
 
-  logger.info(`User '${name}' trying to login`);
-
   if (!name || !password) {
     const error = new ApiError(
       400,
@@ -59,6 +57,7 @@ export const login = async (
     const user = await findUser(name);
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
+      logger.info(`User '${name}' enter wrong password`);
       const error = new ApiError(401, "Wrong password");
       return next(error);
     }

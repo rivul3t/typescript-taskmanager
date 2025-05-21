@@ -75,6 +75,7 @@ export const getTask = async (
   const task = await prismaClient.task.findFirst({
     where: {
       id: taskId,
+      projectId: projectId,
     },
   });
 
